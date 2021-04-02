@@ -114,7 +114,7 @@ autoDetlabIns.config(font =("Arial", 7))
 waitlabIns = tk.Label(frame, text = "Seconds of delay it takes to change page after clicking")
 waitlabIns.config(font =("Arial", 7)) 
 
-startlabIns = tk.Label(frame, text = "This window will disappear. You will hear a Beep everytime a screen shot is taken.") 
+startlabIns = tk.Label(frame, text = "This window will disappear. You do not need to move your mouse or press any key. \n When the PDF is ready, the program will close itself") 
 startlabIns.config(font =("Arial", 7)) 
 inpmoy.insert(tk.END, "1")
 
