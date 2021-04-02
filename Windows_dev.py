@@ -1,5 +1,5 @@
 # Web PDF Saver (Standard GUI-Windows). Liscensed under Apache License 2.0. 
-# THIS IS NOT A RELEASE, for internal testing purposes only.
+# Release v1.0
 
 # Not in standard library- img2pdf, pyautogui, PIL
 import img2pdf
