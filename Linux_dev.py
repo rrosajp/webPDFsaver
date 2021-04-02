@@ -1,12 +1,11 @@
-# Web PDF Saver (Standard GUI-linux). Liscensed under GPL v3. 
+# Web PDF Saver (Standard GUI-Linux). Liscensed under Apache-2.0. 
 # THIS IS NOT A RELEASE, for internal testing purposes only.
 
-# Not in standard library- numpy, matplotlib, pyautogui, fpdf, Pathlib
+# Not in standard library- img2pdf, pyautogui, PIL
+import img2pdf
 import time
 import tkinter as tk
-import numpy as np
-from PIL import Image, ImageGrab
-from fpdf import FPDF
+from PIL import ImageGrab
 import pyautogui
 import os
 
@@ -161,9 +160,10 @@ autoDetlabIns.pack_forget()
 autodet.pack_forget()
 startlabIns.pack_forget()
 startButton.pack_forget()
-frame.wait_visibility(frame)
 frame.wm_attributes('-alpha', 0)
 
+frame.update_idletasks()
+frame.update()
 #Main processing
 
 def main():
@@ -177,22 +177,25 @@ def main():
 	inpmoy.pack_forget()
 	print(varInpMoY, varInpMoX)
 	os.makedirs(save_Loc + "/" + doc)
+	imgs =[]
 
 	for pg_num in range(num_pages):
 		print('On page', str(pg_num + 1))
-		im = ImageGrab.grab()
+		im = ImageGrab.grab(bbox=(frame.winfo_rootx(), frame.winfo_rooty(), frame.winfo_width(), frame.winfo_height()))
 		list1 = [save_Loc, "/", doc, "/", str(pg_num + 1),".png"]
 		finSavLoc = "".join(list1)
 		print(finSavLoc)
 		im.save(finSavLoc)
+		imgs.append(finSavLoc)
 		time.sleep(waitTime)
-		print(save_Loc)
+		print(save_Loc)		
 		#Flip page
 		pyautogui.moveTo(varInpMoX, varInpMoY)
 		pyautogui.click()
-		print("hi guys")
-	
+			
 	inpmox.insert(tk.END, "Combinig PDF...") 
+	with open(save_Loc + "/" + doc + "/" + doc +".pdf" ,"wb") as f:
+		f.write(img2pdf.convert(imgs))
  
 if __name__ == "__main__":
     main()
