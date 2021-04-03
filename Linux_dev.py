@@ -1,12 +1,11 @@
-# Web PDF Saver (Standard GUI-linux). Liscensed under GPL v3. 
-# THIS IS NOT A RELEASE, for internal testing purposes only.
+# Web PDF Saver (Standard GUI-Linux). Liscensed under Apache License 2.0. 
+# Release v1.0
 
-# Not in standard library- numpy, matplotlib, pyautogui, fpdf, Pathlib
+# Not in standard library- img2pdf, pyautogui, PIL
+import img2pdf
 import time
 import tkinter as tk
-import numpy as np
-from PIL import Image, ImageGrab
-from fpdf import FPDF
+from PIL import ImageGrab
 import pyautogui
 import os
 
@@ -46,7 +45,7 @@ inpPageNo = tk.Text(frame,
 labBookName = tk.Label(frame, text = "Book name") 
 labBookName.config(font =("Arial", 8)) 
 
-labIns = tk.Label(frame, text = "Arrange and shape the window so that it covers the entire page.\n Do not include title bar") 
+labIns = tk.Label(frame, text = "Arrange and shape the window so that it covers the entire page.\n Do NOT include title bar") 
 labIns.config(font =("Arial", 9)) 
 
 labSaveLoc = tk.Label(frame, text = "Location") 
@@ -109,7 +108,7 @@ inpWait = tk.Text(frame,
 	height = 2, 
 	width = 20) 
 
-autoDetlabIns = tk.Label(frame, text = "Press the button and go to labSaveLoc. \n The co-ords will be picked up 3 seconds after press.") 
+autoDetlabIns = tk.Label(frame, text = "Press the button and move your mouse over the Next Button to turn the page. \n The co-ords will be picked up 3 seconds after press.") 
 autoDetlabIns.config(font =("Arial", 7)) 
 
 waitlabIns = tk.Label(frame, text = "Seconds of delay it takes to change page after clicking")
@@ -154,45 +153,62 @@ frame.update()
 
 startButton.wait_variable(var)
 
- #Remove all elements and show "processing..."
+ #Remove all elements and make transparent
 labMouseX.pack_forget()
 labMouseY.pack_forget()
 autoDetlabIns.pack_forget()
 autodet.pack_forget()
 startlabIns.pack_forget()
 startButton.pack_forget()
-frame.wait_visibility(frame)
+
+frame.update_idletasks()
+frame.update()
+
 frame.wm_attributes('-alpha', 0)
 
+frame.update_idletasks()
+frame.update()
 #Main processing
 
 def main():
-	save_Loc = inpSaveLoc.get("1.0", "end-1c") 
+    #Prepare variables for processing
+	save_Loc = str(inpSaveLoc.get("1.0", "end-1c"))
 	doc = inplabBookName.get("1.0", "end-1c")
 	num_pages = int(inpPageNo.get("1.0", "end-1c"))
 	waitTime = int(inpWait.get("1.0", "end-1c"))
 	varInpMoY = int(inpmoy.get("1.0",'end-1c'))
 	varInpMoX = int(inpmox.get("1.0",'end-1c'))
-	inpmox.insert(tk.END, "processing...") 
+	
 	inpmoy.pack_forget()
-	print(varInpMoY, varInpMoX)
+	imgs = []
+
+	inpmox.insert(tk.END, "processing...") 
+
+	#Fix all inputs
+	save_Loc = save_Loc.rstrip('/')
+ 
+	if not os.path.exists(save_Loc):
+		os.makedirs(save_Loc)
+	
 	os.makedirs(save_Loc + "/" + doc)
+	pyautogui.moveTo(varInpMoX, varInpMoY) #so that cursor doesn't come in the way
 
 	for pg_num in range(num_pages):
 		print('On page', str(pg_num + 1))
-		im = ImageGrab.grab()
-		list1 = [save_Loc, "/", doc, "/", str(pg_num + 1),".png"]
-		finSavLoc = "".join(list1)
-		print(finSavLoc)
+		im = ImageGrab.grab(bbox=(frame.winfo_rootx(), frame.winfo_rooty(), frame.winfo_width(), frame.winfo_height()))
+		finSavLoc = save_Loc + "/" + doc + "/" + str(pg_num + 1) + ".png"
 		im.save(finSavLoc)
+		imgs.append(finSavLoc)
 		time.sleep(waitTime)
-		print(save_Loc)
+
 		#Flip page
 		pyautogui.moveTo(varInpMoX, varInpMoY)
 		pyautogui.click()
-		print("hi guys")
-	
+
+	print("Combining PDF")	
 	inpmox.insert(tk.END, "Combinig PDF...") 
+	with open(save_Loc + "/" + doc + "/" + doc +".pdf" ,"wb") as f:
+		f.write(img2pdf.convert(imgs))
  
 if __name__ == "__main__":
     main()
